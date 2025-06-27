@@ -5,6 +5,7 @@ import {
       getRecipe, 
       uptadeRecipe} from "../controllers/recipeController.js"
 
+      import controlId from "../middleware/controlld.js"
       import express from "express"
 
 
@@ -15,8 +16,8 @@ router.route("/api/v1/recipes")
 .post(createRecipe)
 
 router.route("/api/v1/recipes/:id")
-.get(getRecipe)
-.delete(deleteRecipe)
-.patch(uptadeRecipe);
+.get(controlId,getRecipe)
+.delete(controlId,deleteRecipe)
+.patch(controlId,uptadeRecipe);
 
 export default router;
