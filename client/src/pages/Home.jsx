@@ -1,23 +1,41 @@
 import { useQuery } from '@tanstack/react-query';
-import { CiSearch } from "react-icons/ci";
+import { useState } from 'react';
 import api from '../api';
+import Card from '../components/Card';
+import Search from '../components/Search';
+import Sort from '../components/Sort';
+import {useDebounce} from "@uidotdev/usehooks";
+
 
 const Home = () => {
-  //apidan tarif verilerini al
-   const { isLoading, error, data } = useQuery({
-    queryKey: ["recipes"],
+
+  //arama
+  const [searchTerm,setSearchTerm]=useState("")
+
+
+  //sıralama
+    const [order,setOrder]=useState(null)
+
+    const debouncedTerm = useDebounce(searchTerm, 500);
+
+//api'a gönderilecek parametreler
+const params={
+  order,
+ search: debouncedTerm,
+}
+
+    // api'dan tarif verilerini al
+  const { isLoading, error, data} = useQuery({
+    queryKey: ["recipes", order,searchTerm, debouncedTerm],
     queryFn: () =>
-      api.get("/api/v1/recipes").then((res) => res.data.recipes),
+      api.get("/api/v1/recipes", { params }).then((res) => res.data.recipes),
   });
+
+
 
   return (
 <main className='overflow-y-auto'>
-<section className='bg-white flex gap-3 p-2 rounded-lg overflow-hidden items-center shadow-lg'>
-  <CiSearch className='text-xl'/>
-
-<input type="text" className='w-full outline-none text-zinc-700' />
-</section>
-
+  <Search setSearchTerm={setSearchTerm}/>
 
  <section className='p-4'>
     {isLoading ?(
@@ -25,11 +43,21 @@ const Home = () => {
     ):error? (
       "ERROR"
     ):(
-      <div>
+      <>
+        <div className='flex justify-between items-center'>
+          <h1 className='text-3xl my-5'>
+      <p>{data ? data.length : 0} tarif bulundu</p>
+          </h1>  
+          
+          <Sort setOrder={setOrder}/>
+           </div>
+        
+      <div className='grid gap-5 md:grid-cols-2 xl:grid-cols-3'>
         {data.map((i)=>( 
-          <div>kart</div>
+          <Card key={i.id} recipe={i}/>
         ))}
       </div>
+      </>
     )
   
   
